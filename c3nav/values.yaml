@@ -605,8 +605,8 @@ static:
 
   image:
     registry: docker.io
-    repository: bitnamilegacy/nginx
-    tag: "1.25"
+    repository: nginx
+    tag: "alpine"
     pullPolicy: IfNotPresent
     pullSecrets: []
 
