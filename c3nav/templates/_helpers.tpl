@@ -370,10 +370,12 @@ The key containing the celery broker URL
 The celery broker URL
 */}}
 {{- define "c3nav.celeryBroker" -}}
-{{- if (and .Values.redis.enabled (empty .Values.c3nav.celery.broker)) -}}
-{{- printf "%s/2" (include "c3nav.redisBaseURL" . ) }}
-{{- else }}
+{{- if not (empty .Values.c3nav.celery.broker) -}}
 {{- .Values.c3nav.celery.broker -}}
+{{- else if (and .Values.redis.enabled (empty .Values.c3nav.celery.broker)) -}}
+{{- printf "%s/2" (include "c3nav.redisBaseURL" . ) -}}
+{{- else if not (empty .Values.c3nav.redis.location) -}}
+{{- regexReplaceAll "/[0-9]+$" .Values.c3nav.redis.location "/2" -}}
 {{- end }}
 {{- end }}
 
@@ -388,10 +390,12 @@ The key containing the celery backend URL
 The celery results backend URL
 */}}
 {{- define "c3nav.celeryBackend" -}}
-{{- if (and .Values.redis.enabled (empty .Values.c3nav.celery.backend)) -}}
-{{- printf "%s/1" (include "c3nav.redisBaseURL" . ) }}
-{{- else }}
+{{- if not (empty .Values.c3nav.celery.backend) -}}
 {{- .Values.c3nav.celery.backend -}}
+{{- else if (and .Values.redis.enabled (empty .Values.c3nav.celery.backend)) -}}
+{{- printf "%s/1" (include "c3nav.redisBaseURL" . ) -}}
+{{- else if not (empty .Values.c3nav.redis.location) -}}
+{{- regexReplaceAll "/[0-9]+$" .Values.c3nav.redis.location "/1" -}}
 {{- end }}
 {{- end }}
 
