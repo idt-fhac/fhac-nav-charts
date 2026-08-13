@@ -9,6 +9,7 @@ spec:
   schedule: "{{ .Values.c3nav.hub.cron_schedule }}"
   jobTemplate:
     spec:
+      backoffLimit: 3
       template:
         metadata:
           name: {{ printf "%s-hub-conrjob" (include "c3nav.fullname" .) }}
@@ -23,7 +24,6 @@ spec:
           securityContext:
             {{- toYaml .Values.core.podSecurityContext | nindent 14 }}
           restartPolicy: OnFailure
-          backoffLimit: 3
           containers:
             - name: c3nav-importhub
               securityContext:
