@@ -78,6 +78,9 @@ spec:
               {{- end }}
             - name: tmp
               mountPath: /tmp
+            {{- if .Values.workers.extraVolumeMounts }}
+            {{- toYaml .Values.workers.extraVolumeMounts | nindent 12 }}
+            {{- end }}
           livenessProbe:
             exec:
               command:
@@ -107,6 +110,9 @@ spec:
         - name: tmp
           emptyDir:
             sizeLimit: 4Gi
+        {{- if .Values.workers.extraVolumes }}
+        {{- toYaml .Values.workers.extraVolumes | nindent 8 }}
+        {{- end }}
       affinity:
       {{- if .Values.workers.affinity }}
         {{- toYaml .Values.workers.affinity | nindent 8 }}

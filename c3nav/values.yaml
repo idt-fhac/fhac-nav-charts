@@ -241,6 +241,8 @@ image:
 
 # c3nav core service
 core:
+  extraVolumes: []
+  extraVolumeMounts: []
   mode: asgi
   uwsgiWorkers: 4
 
@@ -413,6 +415,8 @@ websocket:
 
 # c3nav task worker service
 workers:
+  extraVolumes: []
+  extraVolumeMounts: []
   extraEnv: []
 
   podExtraAnnotations: {}
@@ -600,6 +604,8 @@ tiles:
 
 # c3nav static files service
 static:
+  extraVolumes: []
+  extraVolumeMounts: []
   # deploy seperate pod(s) for serving static files. If set to false the core will take care of it.
   enabled: false
 

@@ -65,6 +65,9 @@ spec:
               mountPath: {{ .Values.persistence.mountPath | quote }}
             - name: tmp
               mountPath: /tmp
+            {{- if .Values.core.extraVolumeMounts }}
+            {{- toYaml .Values.core.extraVolumeMounts | nindent 12 }}
+            {{- end }}
       containers:
         - name: c3nav-core
           securityContext:
@@ -106,6 +109,9 @@ spec:
               {{- end }}
             - name: tmp
               mountPath: /tmp
+            {{- if .Values.core.extraVolumeMounts }}
+            {{- toYaml .Values.core.extraVolumeMounts | nindent 12 }}
+            {{- end }}
           ports:
             - name: http
               containerPort: 8000
@@ -177,6 +183,9 @@ spec:
         - name: tmp
           emptyDir:
             sizeLimit: 4Gi
+        {{- if .Values.core.extraVolumes }}
+        {{- toYaml .Values.core.extraVolumes | nindent 8 }}
+        {{- end }}
       affinity:
       {{- if .Values.core.affinity }}
         {{- toYaml .Values.core.affinity | nindent 8 }}

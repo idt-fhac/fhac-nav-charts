@@ -70,6 +70,9 @@ spec:
               mountPath: /tmp
             - name: staticfiles
               mountPath: /static
+            {{- if .Values.static.extraVolumeMounts }}
+            {{- toYaml .Values.static.extraVolumeMounts | nindent 12 }}
+            {{- end }}
       containers:
         - name: nginx
           securityContext:
@@ -90,6 +93,9 @@ spec:
             - mountPath: /opt/bitnami/nginx/conf/nginx.conf
               name: nginx-config
               subPath: nginx.conf
+            {{- if .Values.static.extraVolumeMounts }}
+            {{- toYaml .Values.static.extraVolumeMounts | nindent 12 }}
+            {{- end }}
           ports:
             - name: http
               containerPort: 8080
@@ -168,6 +174,9 @@ spec:
         - name: tmp
           emptyDir:
             sizeLimit: 1Gi
+        {{- if .Values.static.extraVolumes }}
+        {{- toYaml .Values.static.extraVolumes | nindent 8 }}
+        {{- end }}
       affinity:
       {{- if .Values.static.affinity }}
         {{- toYaml .Values.static.affinity | nindent 8 }}
