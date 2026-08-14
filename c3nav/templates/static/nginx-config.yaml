@@ -8,7 +8,63 @@ metadata:
 data:
   nginx.conf: |
     {{- if empty .Values.static.nginxConfig }}
-    # Based on https://www.nginx.com/resources/wiki/start/topics/examples/full/#nginx-conf 
+    {{- if eq (include "c3nav.static.flavor" .) "nginx" }}
+    # Official nginx image (non-root). Temp/cache dirs are emptyDir mounts.
+    worker_processes  auto;
+    error_log         /var/log/nginx/error.log;
+    pid               /tmp/nginx.pid;
+
+    events {
+        worker_connections  1024;
+    }
+
+    http {
+        include       /etc/nginx/mime.types;
+        default_type  application/octet-stream;
+        log_format    main '$remote_addr - $remote_user [$time_local] '
+                           '"$request" $status $body_bytes_sent "$http_referer" '
+                           '"$http_user_agent" "$http_x_forwarded_for"';
+        access_log    /var/log/nginx/access.log main;
+        add_header    X-Frame-Options SAMEORIGIN;
+
+        client_body_temp_path  /var/cache/nginx/client_temp;
+        proxy_temp_path        /var/cache/nginx/proxy_temp;
+        fastcgi_temp_path      /var/cache/nginx/fastcgi_temp;
+        scgi_temp_path         /var/cache/nginx/scgi_temp;
+        uwsgi_temp_path        /var/cache/nginx/uwsgi_temp;
+
+        sendfile           on;
+        tcp_nopush         on;
+        tcp_nodelay        off;
+        gzip               on;
+        gzip_http_version  1.0;
+        gzip_comp_level    2;
+        gzip_proxied       any;
+        gzip_types         text/plain text/css application/javascript text/xml application/xml+rss;
+        keepalive_timeout  65;
+        client_max_body_size 80M;
+        server_tokens off;
+
+        absolute_redirect  off;
+        port_in_redirect   off;
+
+        server {
+            listen 8080;
+            root /app;
+
+            location /status {
+                stub_status on;
+                access_log   off;
+                allow 127.0.0.1;
+                deny all;
+            }
+        }
+        {{- if (.Values.static.nginxConfigExtra | default "") }}
+        {{- .Values.static.nginxConfigExtra | nindent 8 }}
+        {{- end }}
+    }
+    {{- else }}
+    # Based on https://www.nginx.com/resources/wiki/start/topics/examples/full/#nginx-conf
     # user              www www;  ## Default: nobody
     
     worker_processes  auto; 
@@ -85,6 +141,7 @@ data:
         {{- .Values.static.nginxConfigExtra | nindent 8 }}
         {{- end }}
     }
+    {{- end }}
     {{- else }}
     {{- .Values.static.nginxConfig | nindent 4 }}
     {{- end }}

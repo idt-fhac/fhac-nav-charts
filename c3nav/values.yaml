@@ -609,6 +609,13 @@ static:
   # deploy seperate pod(s) for serving static files. If set to false the core will take care of it.
   enabled: false
 
+  # Nginx image flavor: "bitnami" (default) or "nginx" (Docker Hub official nginx).
+  # Auto-detected as "nginx" when image.repository is "nginx" or "library/nginx"
+  # (not bitnamilegacy/nginx). Official nginx needs this so the chart mounts
+  # /etc/nginx/nginx.conf and writable emptyDirs for /var/cache/nginx
+  # (otherwise: Permission denied on client_temp).
+  flavor: ""
+
   image:
     registry: docker.io
     repository: nginx

@@ -70,6 +70,29 @@ container images
 {{ printf "%s/%s:%s" .Values.static.image.registry .Values.static.image.repository .Values.static.image.tag }}
 {{- end }}
 
+{{/*
+Static nginx image flavor: "bitnami" (default) or "nginx" (official Docker Hub nginx).
+Used for config mount path, modules (brotli), and writable cache mounts.
+*/}}
+{{- define "c3nav.static.flavor" -}}
+{{- $flavor := .Values.static.flavor | default "" -}}
+{{- if $flavor -}}
+{{- $flavor -}}
+{{- else if or (eq .Values.static.image.repository "nginx") (eq .Values.static.image.repository "library/nginx") -}}
+nginx
+{{- else -}}
+bitnami
+{{- end -}}
+{{- end }}
+
+{{- define "c3nav.static.nginxConfigMountPath" -}}
+{{- if eq (include "c3nav.static.flavor" .) "nginx" -}}
+/etc/nginx/nginx.conf
+{{- else -}}
+/opt/bitnami/nginx/conf/nginx.conf
+{{- end -}}
+{{- end }}
+
 
 {{/*
 Name of the ConfigMap with the c3nav.cfg

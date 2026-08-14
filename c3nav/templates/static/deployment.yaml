@@ -80,19 +80,30 @@ spec:
           image: {{ include "c3nav.images.static" . }}
           imagePullPolicy: {{ .Values.static.image.pullPolicy }}
           env:
+            {{- if eq (include "c3nav.static.flavor" .) "bitnami" }}
             - name: BITNAMI_DEBUG
               value: {{ .Values.c3nav.debug | quote }}
             - name: NGINX_HTTP_PORT_NUMBER
               value: "8080"
+            {{- end }}
             {{- if .Values.static.extraEnv }}
             {{- .Values.static.extraEnv | toYaml | nindent 12 }}
             {{- end }}
           volumeMounts:
             - mountPath: /app
               name: staticfiles
-            - mountPath: /opt/bitnami/nginx/conf/nginx.conf
+            - mountPath: {{ include "c3nav.static.nginxConfigMountPath" . | quote }}
               name: nginx-config
               subPath: nginx.conf
+            {{- if eq (include "c3nav.static.flavor" .) "nginx" }}
+            # Official nginx needs writable cache/log dirs under non-root securityContext
+            - mountPath: /var/cache/nginx
+              name: nginx-cache
+            - mountPath: /var/log/nginx
+              name: nginx-logs
+            - mountPath: /tmp
+              name: nginx-tmp
+            {{- end }}
             {{- if .Values.static.extraVolumeMounts }}
             {{- toYaml .Values.static.extraVolumeMounts | nindent 12 }}
             {{- end }}
@@ -157,6 +168,17 @@ spec:
         - name: nginx-config
           configMap:
             name: {{ printf "%s-static" (include "c3nav.fullname" .) }}
+        {{- if eq (include "c3nav.static.flavor" .) "nginx" }}
+        - name: nginx-cache
+          emptyDir:
+            sizeLimit: 64Mi
+        - name: nginx-logs
+          emptyDir:
+            sizeLimit: 32Mi
+        - name: nginx-tmp
+          emptyDir:
+            sizeLimit: 32Mi
+        {{- end }}
         - name: c3nav-config
           configMap:
             name: {{ include "c3nav.configMapName" . }}
@@ -168,7 +190,7 @@ spec:
           persistentVolumeClaim:
             claimName: {{ include "c3nav.pvcName" . }}
           {{- else }}
-          emptyDir: {}
+          emptyDir:
             sizeLimit: 4Gi
           {{- end }}
         - name: tmp
